@@ -1,6 +1,18 @@
 <template>
   <main class="table" ref="table">
     <nav-bar title="列表页">
+      <a-select
+        v-model:value="selectFile"
+        style="width: 160px"
+      >
+        <a-select-option
+          v-for="file of fileList"
+          :key="file.id"
+          :value="file.id"
+        >
+          {{file.name}}
+        </a-select-option>
+      </a-select>
       <a-button @click="download" type="primary">
         导出数据
       </a-button>
@@ -13,7 +25,6 @@
               <a-card title="省份总数" :bordered="false">
                 <a-statistic
                   title="2020年"
-                  :value="getProvinceNum"
                   style="margin-right: 50px"
                 >
                   <template v-slot:suffix>
@@ -26,7 +37,6 @@
               <a-card title="市级总数" :bordered="false">
                 <a-statistic
                   title="2020年"
-                  :value="getCityNum"
                   style="margin-right: 50px"
                 >
                   <template v-slot:suffix>
@@ -39,7 +49,6 @@
               <a-card title="县级总数" :bordered="false">
                 <a-statistic
                   title="2020年"
-                  :value="getCountyNum"
                   style="margin-right: 50px"
                 >
                   <template v-slot:suffix>
@@ -52,97 +61,17 @@
         </div>
       </a-collapse-panel>
     </a-collapse>
-    <a-table
-      :columns="columns"
-      :data-source="json"
-      :pagination="false"
-      :rowKey="record => record.code"
-      @change="handleChange"
-    >
-      <!--<template v-slot:filterIcon="filtered">
-        <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
-      </template>
-      <template
-        v-slot:filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-      >
-        <div style="padding: 8px">
-          <a-input
-            :ref="c => (searchInput = c)"
-            placeholder="请输入筛选关键字"
-            v-model:value="searchText"
-            style="width: 188px; margin-bottom: 8px; display: block;"
-          />
+<!--    <a-table :columns="columns" :data-source="data">-->
 
-          <div class="filter-checkbox">
-            <div :style="{ borderBottom: '1px solid #E9E9E9' }">
-              <a-checkbox
-                :checked="selectedKeys[1]"
-                :indeterminate="selectedKeys[2]"
-                @change="e => onCheckboxCheckAllChange(column.filters, setSelectedKeys, selectedKeys, e)"
-              >
-                全选
-              </a-checkbox>
-            </div>
-            <a-checkbox-group
-              class="filter-checkbox-group-content"
-              :value="selectedKeys[0]"
-              :options="column.filters.filter(i => !searchText ? true : i.label.includes(searchText))"
-              @change="e => onCheckboxChange(column.filters, setSelectedKeys, selectedKeys, e)"
-            />
-          </div>
-          <a-button
-            type="primary"
-            size="small"
-            style="width: 90px; margin-right: 8px"
-            @click="handleSearch(confirm, column.dataIndex)"
-          >
-            筛选
-          </a-button>
-          <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
-            重置
-          </a-button>
-        </div>
-      </template>-->
-      <template v-slot:index="{ index }">{{ index }}</template>
-      <template v-slot:name="{ text, record }">
-        <editable-cell :text="text" @change="val => onCellChange(record.code, 'name', val)" />
-      </template>
-      <template v-slot:child="{ text: child }">
-        {{ child }}
-      </template>
-      <template #expandedRowRender="{ record: { child } }">
-        <span style="margin-right: 15px">所有城市:</span>
-        <a-tag
-          v-for="item of getChildrenCity(child)"
-          :key="item.code"
-          color="geekblue"
-        >
-          {{ item.name }}
-        </a-tag>
-      </template>
-      <template v-slot:action="{ record }">
-        <a-popconfirm
-          v-if="json.length"
-          title="是否删除？"
-          @confirm="onDelete(record.code)"
-        >
-          <a-button type="danger" size="small">
-            <template v-slot:icon>
-              <DeleteOutlined />
-            </template>
-            删除
-          </a-button>
-        </a-popconfirm>
-      </template>
-    </a-table>
+<!--    </a-table>-->
     <a-back-top :target="() => $refs.table" />
   </main>
 </template>
 
 <script>
 import NavBar from '@/components/NavBar'
-import EditableCell from '@/components/EditableCell'
-import { DeleteOutlined } from '@ant-design/icons-vue'
+// import EditableCell from '@/components/EditableCell'
+// import { DeleteOutlined } from '@ant-design/icons-vue'
 
 const sumLength = (list, level = 0) => {
   if (level === 0) {
@@ -155,13 +84,14 @@ const sumLength = (list, level = 0) => {
 export default {
   name: 'Table',
   components: {
-    NavBar,
-    EditableCell,
-    DeleteOutlined
+    NavBar
+    // EditableCell,
+    // DeleteOutlined
   },
   data () {
     return {
-      json: [],
+      fileList: [],
+      selectFile: '',
       rowSelection: [],
       provinceNum: 0,
       cityNum: 0,
@@ -174,8 +104,8 @@ export default {
     }
   },
   created () {
-    console.log(JSON.parse(window.localStorage.getItem('files')))
-    // this.json = JSON.parse(window.localStorage.getItem('file'))
+    this.fileList = JSON.parse(window.localStorage.getItem('files'))
+    if (this.fileList.length > 0) this.selectFile = this.fileList[0].id
   },
   methods: {
     getChildrenCity (children) {
@@ -188,16 +118,16 @@ export default {
       }, [])
     },
     onCellChange (key, dataIndex, value) {
-      const dataSource = [...this.json]
+      const dataSource = [...this.fileList]
       const target = dataSource.find(item => item.code === key)
       if (target) {
         target[dataIndex] = value
-        this.json = dataSource
+        this.fileList = dataSource
       }
     },
     onDelete (key) {
-      const dataSource = [...this.json]
-      this.json = dataSource.filter(item => item.code !== key)
+      const dataSource = [...this.fileList]
+      this.fileList = dataSource.filter(item => item.code !== key)
     },
     download () {
       // 创建隐藏的可下载链接
@@ -205,7 +135,7 @@ export default {
       eleLink.download = `${new Date().getTime()}.json`
       eleLink.style.display = 'none'
       // 字符内容转变成blob地址
-      const blob = new Blob([JSON.stringify(this.json, null, 2)])
+      const blob = new Blob([JSON.stringify(this.fileList, null, 2)])
       eleLink.href = URL.createObjectURL(blob)
       // 触发点击
       document.body.appendChild(eleLink)
@@ -251,21 +181,22 @@ export default {
     }
   },
   computed: {
+    getTableData () {
+      return this.fileList.find(i => i.id === this.selectFile)
+    },
     getProvinceNum () {
-      return sumLength(this.json, 0)
+      return sumLength(this.fileList, 0)
     },
     getCityNum () {
-      return sumLength(this.json, 1)
+      return sumLength(this.fileList, 1)
     },
     getCountyNum () {
-      return sumLength(this.json, 2)
+      return sumLength(this.fileList, 2)
     },
     columns () {
       let { sortedInfo, filteredInfo } = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
-
-      console.log(sortedInfo, filteredInfo)
       return [
         {
           title: '序号',
@@ -284,7 +215,7 @@ export default {
           sorter: (a, b) => a.name.localeCompare(b.name, 'zh'),
           sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
           filteredValue: filteredInfo.name || null,
-          filters: this.json.map(i => ({ text: i.name, value: i.code })),
+          filters: this.fileList.map(i => ({ text: i.name, value: i.code })),
           onFilter: (value, record) => record.code.includes(value),
           /* onFilterDropdownVisibleChange: visible => {
             if (visible) {
@@ -308,7 +239,7 @@ export default {
           sorter: (a, b) => Number(a.code) - Number(b.code),
           sortOrder: sortedInfo.columnKey === 'code' && sortedInfo.order,
           filteredValue: filteredInfo.code || null,
-          filters: this.json.map(i => ({ text: i.code, value: i.code })),
+          filters: this.fileList.map(i => ({ text: i.code, value: i.code })),
           onFilter: (value, record) => record.code.includes(value),
           /* onFilterDropdownVisibleChange: visible => {
             if (visible) {

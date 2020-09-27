@@ -64,4 +64,9 @@ export default {
   height: 100vh;
   max-height: 100%;
 }
+
+#app > .ant-spin-nested-loading, #app > .ant-spin-nested-loading > .ant-spin-container {
+  height: 100%;
+  width: 100%;
+}
 </style>

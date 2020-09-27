@@ -11,9 +11,11 @@ const receiveFile = (file) => {
     case 'xls':
     case 'xlsx':
       fileUtil = new Xlsx(file.path)
-      result = {}
-      result.sheetNames = fileUtil.getSheetName()
-      result.sheets = fileUtil.getSheet(result.sheetNames)
+      result = {
+        sheetNames: fileUtil.getSheetName(),
+        sheets: fileUtil.getSheet(fileUtil.getSheetName())
+        // headers: fileUtil.getHeaderEow()
+      }
       break
     case 'json':
       result = JSON.parse(readFileSync(resolve(file.path), 'utf-8'))
