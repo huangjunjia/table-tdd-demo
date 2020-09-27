@@ -7,8 +7,9 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import '@/assets/css/reset.css'
 
-createApp(App)
+const app = createApp(App)
   .use(store)
   .use(router)
   .use(Antd)
-  .mount('#app')
+
+app.mount('#app')

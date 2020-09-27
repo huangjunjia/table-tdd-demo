@@ -174,7 +174,8 @@ export default {
     }
   },
   created () {
-    this.json = JSON.parse(window.localStorage.getItem('file'))
+    console.log(JSON.parse(window.localStorage.getItem('files')))
+    // this.json = JSON.parse(window.localStorage.getItem('file'))
   },
   methods: {
     getChildrenCity (children) {
