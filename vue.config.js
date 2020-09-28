@@ -4,25 +4,10 @@ const resolve = p => path.resolve(__dirname, p)
 module.exports = {
   lintOnSave: false,
   runtimeCompiler: true,
-  pages: {
-    index: {
-      // page 的入口
-      entry: resolve('./src/renderer/main.js'),
-      // 模板来源
-      template: resolve('./src/renderer/public/index.html'),
-      // 在 dist/index.html 的输出
-      filename: 'index.html',
-      // 当使用 title 选项时，
-      // template 中的 title 标签需要是 <title><%= htmlWebpackPlugin.options.title %></title>
-      title: '',
-      // 在这个页面中包含的块，默认情况下会包含
-      // 提取出来的通用 chunk 和 vendor chunk。
-      chunks: ['chunk-vendors', 'chunk-common', 'index']
-    }
-  },
   chainWebpack: config => {
     config
-      .entry('index')
+      .entry('app')
+      .clear()
       .add(resolve('./src/renderer/main.js'))
       .end()
     config.resolve.alias
