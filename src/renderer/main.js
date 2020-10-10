@@ -6,6 +6,7 @@ import Antd from 'ant-design-vue'
 
 import 'ant-design-vue/dist/antd.css'
 import '@/assets/css/reset.css'
+import '@/assets/css/customer.css'
 
 const app = createApp(App)
   .use(store)

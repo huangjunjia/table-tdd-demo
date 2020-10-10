@@ -36,5 +36,8 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
+  height: 65px;
+  background: #ffffff;
+  box-shadow: 0 0 3px 2px #efefef;
 }
 </style>

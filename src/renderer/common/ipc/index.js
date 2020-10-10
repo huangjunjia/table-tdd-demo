@@ -9,6 +9,7 @@ class Ipc {
     this.ipcRenderer = window.ipcRenderer
   }
 
+  // 解析文件
   receiveFile (file) {
     return new Promise(resolve => {
       const uuid = utils.uuid(8, 16)
@@ -21,6 +22,8 @@ class Ipc {
       this.ipcRenderer.once(`reply-receive-file-result:${uuid}`, (event, arg) => resolve(arg))
     })
   }
+
+  // 获取缓存文件
 }
 
 export {

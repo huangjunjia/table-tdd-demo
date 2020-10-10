@@ -19,6 +19,8 @@ class Window {
 
   start () {
     this.window = new BrowserWindow(this.config)
+    this.window.maximize()
+    this.window.show()
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
       // Load the url of the dev server if in development mode

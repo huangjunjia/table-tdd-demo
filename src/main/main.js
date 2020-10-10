@@ -1,8 +1,8 @@
 'use strict'
 import { Window } from './window'
-import { App } from '@/main/app'
-import { Protocol } from '@/main/protocol'
-import { Ipc } from '@/main/ipc'
+import { App } from './app'
+import { Protocol } from './protocol'
+import { Ipc } from './ipc'
 
 const path = require('path')
 
@@ -11,6 +11,7 @@ const win = new Window({
   minWidth: 800,
   height: 600,
   minHeight: 600,
+  show: false,
   webPreferences: {
     // Use pluginOptions.nodeIntegration, leave this alone
     // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info

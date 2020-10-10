@@ -12,6 +12,7 @@
       </a-radio-button>
     </a-radio-group>-->
     <a-upload-dragger
+      ref="upload-input"
       class="upload-input"
       name="file"
       accept=".json,.xlsx,.xls"
@@ -37,8 +38,9 @@
 </template>
 
 <script>
-import { InboxOutlined } from '@ant-design/icons-vue'
+import { InboxOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { ipcRenderer } from '@/common'
+import { createVNode } from 'vue'
 
 export default {
   name: 'Home',
@@ -54,17 +56,25 @@ export default {
       fileList: []
     }
   },
+  mounted () {
+    if (window.localStorage.getItem('files')) {
+      const _this = this
+      this.$confirm({
+        title: '监测到存在旧数据，是否重新选择文件？',
+        icon: createVNode(ExclamationCircleOutlined),
+        content: createVNode('div', { style: 'color:red;' }, '如重新上传将会清除旧数据'),
+        onOk () {
+          window.localStorage.removeItem('files')
+        },
+        onCancel () {
+          _this.$router.push('/table')
+        }
+      })
+    }
+  },
   methods: {
     handleChange ({ file, fileList }) {
       this.loading.open()
-      // const fileReader = new FileReader()
-      // fileReader.readAsText(file)
-      // fileReader.onload = () => {
-      //   // 文件读取内容
-      //   window.localStorage.setItem('file', fileReader.result)
-      //   this.loading = false
-      //   this.$router.push('/table')
-      // }
       ipcRenderer.receiveFile(file).then(res => {
         this.fileCount++
         this.fileList.push(res)
