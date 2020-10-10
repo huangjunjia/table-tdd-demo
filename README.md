@@ -64,7 +64,7 @@ npm install # yarn install
         打开`Terminal`然后输入
         
         ```shell script
-        export hELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
+        export ELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
         ```
       
         然后执行`npm intall`
