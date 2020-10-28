@@ -9,6 +9,15 @@ class Ipc {
     this.ipcRenderer = window.ipcRenderer
   }
 
+  // 发送ipc事件
+  send (name, data) {
+    return new Promise(resolve => {
+      const uuid = utils.uuid(8, 16)
+      this.ipcRenderer.send(name, data)
+      this.ipcRenderer.once(`${name}:${uuid}`, (event, arg) => resolve(arg))
+    })
+  }
+
   // 解析文件
   receiveFile (file) {
     return new Promise(resolve => {

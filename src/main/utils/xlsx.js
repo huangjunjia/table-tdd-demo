@@ -81,6 +81,7 @@ class Xlsx {
     } else {
       const data = {}
       this.workbook.SheetNames.forEach(sheetName => {
+        console.log(this.workbook.Sheets[sheetName])
         data[sheetName] = trimKey(XLSX.utils.sheet_to_json(this.workbook.Sheets[sheetName]))
       })
       return data
