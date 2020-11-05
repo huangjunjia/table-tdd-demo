@@ -18,11 +18,7 @@
         导出数据
       </a-button>
     </nav-bar>
-    <a-tabs
-      ref="table-content"
-      class="table-content"
-      @change="tabIndexChange"
-    >
+    <a-tabs ref="table-content" class="table-content" @change="tabIndexChange">
       <a-tab-pane
         class="tab-pane-content"
         v-for="(sheet, index) of getSheetNames"
@@ -31,14 +27,24 @@
         v-model:value="selectSheet"
       >
         <a-table
+          v-if="!reloadTable"
           :columns="getColumns"
           :data-source="getSheet"
           :row-key="record => record.id"
           :pagination="pagination"
           :row-selection="rowSelection"
+          :scroll="{ x: 3000, y: getTableScrollY }"
         >
           <template #index="{index, record}">
-            <p :style="{paddingLeft: (!Object.prototype.hasOwnProperty.call(record, 'children') && !record.single) ? '10px' : ''}">{{ Object.prototype.hasOwnProperty.call(record, 'children') ? record.index + 1 : record.single ? record.index + 1 : `${record.index + 1}-${index + 1}` }}</p>
+            <p>
+              {{
+                Object.prototype.hasOwnProperty.call(record, "children")
+                  ? record.index + 1
+                  : record.single
+                  ? record.index + 1
+                  : `${record.index + 1}-${index + 1}`
+              }}
+            </p>
           </template>
           <template #COA="{text}">
             <template v-if="Array.isArray(text)">
@@ -128,28 +134,43 @@
               </a-tag>
             </template>
             <template v-else-if="text">
-              <a-tag :color="getRiskClassificationTagColor(text)">{{ text }}</a-tag>
+              <a-tag :color="getRiskClassificationTagColor(text)">{{
+                  text
+                }}
+              </a-tag>
             </template>
           </template>
+          <template #BalanceTitle>
+            <span class="custom-title">
+              <span>{{customTitle.cutdown}}</span>
+              <span>项目余额</span>
+            </span>
+          </template>
           <template #Balance="{text}">
-            <p style="text-align: right">{{text.toLocaleString('en-US')}}</p>
+            <p style="text-align: right">{{ text.toLocaleString("en-US") }}</p>
+          </template>
+          <template #CutDownTitle>
+            <span class="custom-title">
+              <span>{{customTitle.cutdown}}</span>
+              <span>单项减值</span>
+            </span>
           </template>
           <template #CutDown="{text}">
-            <p style="text-align: right">{{text.toLocaleString('en-US')}}</p>
+            <p style="text-align: right">{{ text.toLocaleString("en-US") }}</p>
           </template>
         </a-table>
         <footer class="statistics-bar">
           <a-statistic
-            v-for="(key, index) of getSheetSpecialKeyAndValue"
+            v-for="(key, index) of getSheetBalanceAndCutdown"
             :title="key.title"
             :key="`${key}__${index}`"
             :precision="2"
-            :value="JSON.stringify(key)"
+            :value="key.value"
           />
         </footer>
       </a-tab-pane>
     </a-tabs>
-    <a-back-top :target="() => $refs['table-content'].$el" />
+    <a-back-top :target="() => $refs['table-content'].$el"/>
   </main>
 </template>
 
@@ -187,68 +208,96 @@ export default {
       sheets: [],
       selectSheet: '',
       pagination: false,
+      reloadTable: false,
+      customTitle: {
+        balance: '',
+        cutdown: ''
+      },
       columns: [
         {
-          title: ''
+          title: '',
+          width: 40,
+          fixed: 'left'
         },
         {
           title: '序号',
           slots: { customRender: 'index' },
-          width: '100px'
+          width: 100,
+          fixed: 'left'
         },
         {
-          title: '项目名称（户）',
-          dataIndex: '项目名称（户）',
-          key: 'ProjectNameByAccount',
-          slots: { customRender: 'ProjectNameByAccount' }
-        },
-        {
-          title: '项目名称（笔）',
-          dataIndex: '项目名称（笔）',
-          key: 'ProjectNameBySingle',
-          slots: { customRender: 'ProjectNameBySingle' }
+          title: '项目名称',
+          dataIndex: '项目名称',
+          key: 'ProjectName',
+          slots: {
+            title: 'ProjectNameTitle',
+            customRender: 'ProjectName'
+          },
+          width: 250,
+          fixed: 'left'
         },
         {
           title: 'COA',
           dataIndex: 'COA',
           key: 'COA',
-          slots: { customRender: 'COA' }
+          slots: {
+            title: 'COATitle',
+            customRender: 'COA'
+          }
         },
         {
           title: '成本中心',
           key: 'CostCenter',
           dataIndex: '成本中心',
-          slots: { customRender: 'CostCenter' }
+          slots: {
+            title: 'CostCenterTitle',
+            customRender: 'CostCenter'
+          }
         },
         {
           title: '表内外',
           key: 'TablePosition',
           dataIndex: '表内外',
-          slots: { customRender: 'TablePosition' }
+          slots: {
+            title: 'TablePositionTitle',
+            customRender: 'TablePosition'
+          }
         },
         {
           title: 'AC/PL',
           key: 'ACAndPL',
           dataIndex: 'AC/PL',
-          slots: { customRender: 'ACAndPL' }
+          slots: {
+            title: 'ACAndPLTitle',
+            customRender: 'ACAndPL'
+          }
         },
         {
           title: '披露口径',
           key: 'DisclosureCaliber',
           dataIndex: '披露口径',
-          slots: { customRender: 'DisclosureCaliber' }
+          slots: {
+            title: 'DisclosureCaliberTitle',
+            customRender: 'DisclosureCaliber'
+          }
         },
         {
           title: '资产类别',
           key: 'AssetTypes',
           dataIndex: '资产类别',
-          slots: { customRender: 'AssetTypes' }
+          slots: {
+            title: 'AssetTypesTitle',
+            customRender: 'AssetTypes'
+          }
         },
         {
           title: '风险分类',
           key: 'RiskClassification',
           dataIndex: '风险分类',
-          slots: { customRender: 'RiskClassification' }
+          slots: {
+            title: 'RiskClassificationTitle',
+            customRender: 'RiskClassification'
+          }
         }
       ]
     }
@@ -259,13 +308,15 @@ export default {
     }
   },
   created () {
-    this.fileList = JSON.parse(window.localStorage.getItem('files')).map(item => ({
-      ...item,
-      data: {
-        ...item.data,
-        sheets: setId(item.data.sheets)
-      }
-    }))
+    this.fileList = JSON.parse(window.localStorage.getItem('files')).map(
+      item => ({
+        ...item,
+        data: {
+          ...item.data,
+          sheets: setId(item.data.sheets)
+        }
+      })
+    )
 
     if (this.fileList.length > 0) {
       this.selectFileId = this.fileList[0].id
@@ -323,7 +374,7 @@ export default {
       return TAG_COLOR[index]
     },
     // 获取风险分类标签颜色
-    getRiskClassificationTagColor (key) {
+    getRiskClassificationTagColor (tag) {
       const color = {
         正常: 'green',
         损失: 'red',
@@ -332,21 +383,26 @@ export default {
         次级: 'cyan',
         不分类: ''
       }
-      if (key) {
-        return color[key]
+      if (typeof tag === 'object') {
+        return color[tag.text]
+      } else if (typeof tag === 'string') {
+        return color[tag]
       } else {
         return ''
       }
     },
     changeColumns (arr) {
       this.columns = this.columns.concat(arr)
-      console.log(this.columns)
+    },
+    changeCustomTitle (key, value) {
+      this.customTitle[key] = value.replace(/(\d{4}年\d{2}月\d{2}日).*/, '$1')
     }
   },
   computed: {
     // 获取 sheet's names
     getSheetNames () {
-      return this.fileList.find(i => i.id === this.selectFileId).data.sheetNames
+      return this.fileList.find(i => i.id === this.selectFileId).data
+        .sheetNames
     },
     // 获取当前选中文件
     getFile () {
@@ -355,7 +411,7 @@ export default {
     // 获取表格数据
     getSheet () {
       // 判断是否为有效值
-      const isEffectiveValue = (i) => i !== null && i !== undefined && i !== ''
+      const isEffectiveValue = i => i !== null && i !== undefined && i !== ''
       // 深拷贝
       const sheet = JSON.parse(JSON.stringify(this.sheets[this.selectSheet]))
       sheet.splice(-2, 2)
@@ -371,10 +427,21 @@ export default {
           Object.entries(i).forEach(([key, value]) => {
             // 判断key是否为目标、合法且包含
             if (
-              ['AC/PL', '成本中心', '披露口径', '移交类型', 'COA', '表内外', '资产类别', '项目名称（笔）', '风险分类'].includes(key) &&
+              [
+                'AC/PL',
+                '成本中心',
+                '披露口径',
+                '移交类型',
+                'COA',
+                '表内外',
+                '资产类别',
+                '项目名称',
+                '风险分类'
+              ].includes(key) &&
               isEffectiveValue(value) &&
-              !result[key].includes(value)
+              !result[key].find(i => i.text === value)
             ) {
+              if (/项目名称/.test(key)) key = key.replace(/(项目名称)/, '$1')
               result[key].push({
                 text: value,
                 id: Utils.uuid()
@@ -399,14 +466,16 @@ export default {
             COA: [],
             表内外: [],
             资产类别: [],
-            '项目名称（户）': item['项目名称（户）'],
-            '项目名称（笔）': [],
+            项目名称: item['项目名称（户）'],
+            // '项目名称（笔）': [],
             风险分类: [],
-            children: [{
-              index: result.length,
-              ...item,
-              '项目名称（户）': ''
-            }]
+            children: [
+              {
+                index: result.length,
+                ...item,
+                项目名称: item['项目名称（笔）']
+              }
+            ]
           }
 
           const paramKey = Object.keys(param)
@@ -424,23 +493,25 @@ export default {
         } else {
           let param = result[index]
           if (isEffectiveValue(item['项目名称（户）'])) {
-            param['项目名称（户）'] = item['项目名称（户）']
+            param['项目名称'] = item['项目名称（户）']
           }
 
           // 判断数据合法性
           param = mergeParam(item, param)
-          param['项目名称（笔）'] = []
+          // param['项目名称'] = []
           param.children.push({
             index,
             ...item,
-            '项目名称（户）': ''
+            项目名称: item['项目名称（笔）']
           })
           result[index] = param
         }
       })
-      console.log(result)
       return result.map(item => {
-        if (Object.prototype.hasOwnProperty.call(item, 'children') && item.children.length === 1) {
+        if (
+          Object.prototype.hasOwnProperty.call(item, 'children') &&
+          item.children.length === 1
+        ) {
           return {
             ...item.children[0],
             single: true
@@ -450,20 +521,59 @@ export default {
         }
       })
     },
-    getSheetSpecialKeyAndValue () {
+    getSheetBalanceAndCutdown () {
       const keys = []
       Object.keys(this.getSheet[0]).forEach(key => {
         if (/余额|减值/.test(key)) {
+          this.changeCustomTitle(/余额/.test(key) ? 'balance' : 'cutdown', key)
           keys.push({
-            title: key,
+            // title: key,
             key: /余额/.test(key) ? 'Balance' : 'CutDown',
             dataIndex: key,
-            slots: { customRender: /余额/.test(key) ? 'Balance' : 'CutDown' }
+            slots: {
+              title: `${/余额/.test(key) ? 'Balance' : 'CutDown'}Title`,
+              customRender: /余额/.test(key) ? 'Balance' : 'CutDown'
+            }
           })
         }
       })
       this.changeColumns(keys)
-      return {}
+
+      // 深度遍历
+      const deep = (list) => {
+        let balance = 0
+        let cutdown = 0
+        list.forEach(item => {
+          if (Object.prototype.hasOwnProperty.call(list, 'children')) {
+            const sum = deep(item.children)
+            balance += sum.balance
+            cutdown += sum.cutdown
+          } else {
+            Object.keys(item).forEach(key => {
+              if (/余额/.test(key)) {
+                balance += item[key]
+              } else if (/减值/.test(key)) {
+                cutdown += item[key]
+              }
+            })
+          }
+        })
+        return {
+          balance,
+          cutdown
+        }
+      }
+      const result = deep(this.getSheet)
+      return [
+        {
+          title: '总项目余额',
+          value: result.balance
+        },
+        {
+          title: '总单项减值',
+          value: result.cutdown
+        }
+      ]
     },
     getColumns () {
       return this.columns
@@ -471,7 +581,11 @@ export default {
     rowSelection () {
       return {
         onChange: (selectedRowKeys, selectedRows) => {
-          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+          console.log(
+            `selectedRowKeys: ${selectedRowKeys}`,
+            'selectedRows: ',
+            selectedRows
+          )
         },
         onSelect: (record, selected, selectedRows) => {
           console.log(record, selected, selectedRows)
@@ -480,6 +594,9 @@ export default {
           console.log(selected, selectedRows, changeRows)
         }
       }
+    },
+    getTableScrollY () {
+      return window.innerHeight - 310
     }
   }
 }
@@ -505,15 +622,44 @@ main.table {
       z-index: 1;
     }
 
+    & /deep/ .ant-table-body {
+      & /deep/ .ant-table-thead {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    & /deep/ .ant-table-row {
+      & /deep/ td:nth-child(5) {
+        margin-left: 20px;
+      }
+    }
+
+    & /deep/ .ant-table-row-cell-break-word {
+      //padding: 0;
+    }
+
+    .custom-title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .statistics-bar {
       position: sticky;
       bottom: 0;
       display: flex;
       align-items: center;
-      justify-items: flex-end;
+      justify-content: flex-end;
       background: #fff;
       width: 100%;
       border-top: 1px solid #efefef;
+      padding: 20px 0;
+      z-index: 10;
+
+      & .ant-statistic {
+        margin: 0 50px;
+      }
     }
   }
 }
