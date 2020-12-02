@@ -13,7 +13,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "ant-design-vue": "^2.0.0-beta.13",
+    "ant-design-vue": "^2.0.0-rc.1",
     "core-js": "^3.6.5",
     "lodash": "^4.17.20",
     "nedb": "^1.8.0",

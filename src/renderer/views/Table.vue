@@ -19,6 +19,18 @@
       </a-button>
     </nav-bar>
     <a-tabs ref="table-content" class="table-content" @change="tabIndexChange">
+      <template #tabBarExtraContent>
+        <div class="tab-content-action-bar">
+          <a-button type="primary" @click="unfoldAll">
+            <ArrowsAltOutlined />
+            全部展开
+          </a-button>
+          <a-button type="primary" @click="foldAll">
+            <ShrinkOutlined />
+            全部折叠
+          </a-button>
+        </div>
+      </template>
       <a-tab-pane
         class="tab-pane-content"
         v-for="(sheet, index) of getSheetNames"
@@ -33,7 +45,9 @@
           :row-key="record => record.id"
           :pagination="pagination"
           :row-selection="rowSelection"
-          :scroll="{ x: 3000, y: getTableScrollY }"
+          :scroll="{ x: 2000, y: tableScrollY }"
+          :expanded-row-keys="expandedRowKeys"
+          bordered
         >
           <template #index="{index, record}">
             <p>
@@ -47,98 +61,118 @@
             </p>
           </template>
           <template #COA="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #CostCenter="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #TablePosition="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #ACAndPL="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #DisclosureCaliber="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #AssetTypes="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="(tag, index) of text"
-                :key="tag.id"
-                :color="getTagColor(index)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getTagColor()">{{ text }}</a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getTagColor(index)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getTagColor()">{{ text }}</a-tag>
+              </template>
+            </span>
           </template>
           <template #RiskClassification="{text}">
-            <template v-if="Array.isArray(text)">
-              <a-tag
-                v-for="tag of text"
-                :key="tag.id"
-                :color="getRiskClassificationTagColor(tag)"
-              >{{ tag.text }}
-              </a-tag>
-            </template>
-            <template v-else-if="text">
-              <a-tag :color="getRiskClassificationTagColor(text)">{{
-                  text
-                }}
-              </a-tag>
-            </template>
+            <span class="tag-list">
+              <template v-if="Array.isArray(text)">
+                <template
+                  v-for="(tag, index) of text"
+                  :key="tag.id"
+                >
+                  <a-tag :color="getRiskClassificationTagColor(tag.text)">{{ tag.text }}</a-tag>
+                  <br v-if="index % 2 === 1"/>
+                </template>
+              </template>
+              <template v-else-if="text">
+                <a-tag :color="getRiskClassificationTagColor(text)">
+                  {{ text }}
+                </a-tag>
+              </template>
+            </span>
           </template>
           <template #BalanceTitle>
             <span class="custom-title">
@@ -146,8 +180,15 @@
               <span>项目余额</span>
             </span>
           </template>
-          <template #Balance="{text}">
-            <p style="text-align: right">{{ text.toLocaleString("en-US") }}</p>
+          <template #Balance="{text, record, column}">
+            <p v-if="Object.prototype.hasOwnProperty.call(record, 'children')">
+              {{ Number(text).toFixed(2).toLocaleString('en-us') }}
+            </p>
+            <editable-cell
+              v-else
+              :text="text"
+              @change="val => onCellChange(record.id, column.dataIndex, val)"
+            />
           </template>
           <template #CutDownTitle>
             <span class="custom-title">
@@ -155,19 +196,28 @@
               <span>单项减值</span>
             </span>
           </template>
-          <template #CutDown="{text}">
-            <p style="text-align: right">{{ text.toLocaleString("en-US") }}</p>
+          <template #CutDown="{text, record, column}">
+            <p v-if="Object.prototype.hasOwnProperty.call(record, 'children')">
+              {{ Number(text).toFixed(2).toLocaleString('en-us') }}
+            </p>
+            <editable-cell
+              v-else
+              :text="text"
+              @change="val => onCellChange(record.id, column.dataIndex, val)"
+            />
+          </template>
+          <template #footer>
+            <footer class="statistics-bar">
+              <a-statistic
+                v-for="(key, index) of getSheetBalanceAndCutdown"
+                :title="key.title"
+                :key="`${key}__${index}`"
+                :precision="2"
+                :value="key.value"
+              />
+            </footer>
           </template>
         </a-table>
-        <footer class="statistics-bar">
-          <a-statistic
-            v-for="(key, index) of getSheetBalanceAndCutdown"
-            :title="key.title"
-            :key="`${key}__${index}`"
-            :precision="2"
-            :value="key.value"
-          />
-        </footer>
       </a-tab-pane>
     </a-tabs>
     <a-back-top :target="() => $refs['table-content'].$el"/>
@@ -177,6 +227,8 @@
 <script>
 import NavBar from '@/components/NavBar'
 import Utils from '@/common/utils'
+import EditableCell from '@/components/EditableCell'
+import { ArrowsAltOutlined, ShrinkOutlined } from '@ant-design/icons-vue'
 
 // 设置id
 function setId (data) {
@@ -199,7 +251,10 @@ const TAG_COLOR = ['blue', 'pink', 'red', 'orange', 'green', 'cyan', 'purple']
 export default {
   name: 'Table',
   components: {
-    NavBar
+    EditableCell,
+    NavBar,
+    ArrowsAltOutlined,
+    ShrinkOutlined
   },
   data () {
     return {
@@ -209,21 +264,22 @@ export default {
       selectSheet: '',
       pagination: false,
       reloadTable: false,
+      tableScrollY: window.innerHeight - 301,
       customTitle: {
         balance: '',
         cutdown: ''
       },
+      isFirstLoad: true,
+      expandedRowKeys: [],
       columns: [
         {
           title: '',
-          width: 40,
-          fixed: 'left'
+          width: 50
         },
         {
           title: '序号',
           slots: { customRender: 'index' },
-          width: 100,
-          fixed: 'left'
+          width: 100
         },
         {
           title: '项目名称',
@@ -233,8 +289,7 @@ export default {
             title: 'ProjectNameTitle',
             customRender: 'ProjectName'
           },
-          width: 250,
-          fixed: 'left'
+          width: 250
         },
         {
           title: 'COA',
@@ -288,7 +343,8 @@ export default {
           slots: {
             title: 'AssetTypesTitle',
             customRender: 'AssetTypes'
-          }
+          },
+          width: 200
         },
         {
           title: '风险分类',
@@ -320,10 +376,13 @@ export default {
 
     if (this.fileList.length > 0) {
       this.selectFileId = this.fileList[0].id
-      this.sheets = this.fileList[0].data.sheets
+      this.sheets = { ...this.fileList[0].data.sheets }
       this.selectSheet = this.fileList[0].data.sheetNames[0]
     }
     // this.init()
+  },
+  mounted () {
+    window.addEventListener('resize', this.getTableScrollY)
   },
   methods: {
     // 初始化
@@ -392,17 +451,64 @@ export default {
       }
     },
     changeColumns (arr) {
-      this.columns = this.columns.concat(arr)
+      this.columns = arr.reduce((acc, cur) => {
+        if (!acc.find(i => i.dataIndex === cur.dataIndex)) {
+          acc.push(cur)
+        }
+        return acc
+      }, this.columns)
     },
     changeCustomTitle (key, value) {
       this.customTitle[key] = value.replace(/(\d{4}年\d{2}月\d{2}日).*/, '$1')
+    },
+    // 获取table的y轴可滚动距离
+    getTableScrollY () {
+      this.tableScrollY = window.innerHeight - 301
+    },
+    // 修改单元格触发
+    onCellChange (key, dataIndex, value) {
+      const dataSource = [...this.getSheet]
+      const deep = (list) => {
+        for (const item of list) {
+          if (Object.prototype.hasOwnProperty.call(item, 'children')) {
+            const res = deep(item.children)
+            if (res) {
+              return res
+            }
+          } else if (item.id === key) {
+            return item
+          }
+        }
+      }
+      const target = deep(dataSource)
+      if (target) {
+        target[dataIndex] = value
+        this.sheets[this.selectSheet] = dataSource
+      }
+    },
+    // 改变页面是否初始化
+    changePageInitState (value) {
+      this.isFirstLoad = value
+    },
+    // 展开全部
+    unfoldAll () {
+      const keys = []
+      this.getSheet.forEach(item => {
+        if (Object.prototype.hasOwnProperty.call(item, 'children') && !item.single) {
+          keys.push(item.id)
+        }
+      })
+      this.expandedRowKeys = keys
+    },
+    // 折叠全部
+    foldAll () {
+      this.expandedRowKeys = []
     }
   },
   computed: {
     // 获取 sheet's names
     getSheetNames () {
-      return this.fileList.find(i => i.id === this.selectFileId).data
-        .sheetNames
+      return this.fileList.find(i => i.id === this.selectFileId).data.sheetNames
     },
     // 获取当前选中文件
     getFile () {
@@ -413,10 +519,13 @@ export default {
       // 判断是否为有效值
       const isEffectiveValue = i => i !== null && i !== undefined && i !== ''
       // 深拷贝
-      const sheet = JSON.parse(JSON.stringify(this.sheets[this.selectSheet]))
-      sheet.splice(-2, 2)
+      const sheet = [...this.sheets[this.selectSheet]]
+      if (this.isFirstLoad) {
+        sheet.splice(-2, 2)
+        this.changePageInitState(false)
+      }
       const result = []
-      sheet.forEach((item, sheetIndex) => {
+      sheet.forEach(item => {
         // 判断该归并类是否存在
         const index = result.findIndex(i => i.归并 === item.归并)
         // 插入数据
@@ -439,9 +548,10 @@ export default {
                 '风险分类'
               ].includes(key) &&
               isEffectiveValue(value) &&
+              Array.isArray(result[key]) &&
               !result[key].find(i => i.text === value)
             ) {
-              if (/项目名称/.test(key)) key = key.replace(/(项目名称)/, '$1')
+              if (/项目名称/.test(key)) key = '项目名称'
               result[key].push({
                 text: value,
                 id: Utils.uuid()
@@ -466,14 +576,14 @@ export default {
             COA: [],
             表内外: [],
             资产类别: [],
-            项目名称: item['项目名称（户）'],
+            项目名称: item['项目名称（户）'] || item['项目名称'],
             // '项目名称（笔）': [],
             风险分类: [],
             children: [
               {
                 index: result.length,
                 ...item,
-                项目名称: item['项目名称（笔）']
+                项目名称: item['项目名称（笔）'] || item['项目名称']
               }
             ]
           }
@@ -492,8 +602,8 @@ export default {
           result.push(param)
         } else {
           let param = result[index]
-          if (isEffectiveValue(item['项目名称（户）'])) {
-            param['项目名称'] = item['项目名称（户）']
+          if (isEffectiveValue(item['项目名称（户）'] || item['项目名称'])) {
+            param['项目名称'] = item['项目名称（户）'] || item['项目名称']
           }
 
           // 判断数据合法性
@@ -504,6 +614,13 @@ export default {
             ...item,
             项目名称: item['项目名称（笔）']
           })
+          // 计算户的总减值和总余额
+          Object.keys(item).forEach(key => {
+            if (/余额|减值/.test(key)) {
+              param[key] += item[key]
+            }
+          })
+
           result[index] = param
         }
       })
@@ -523,6 +640,7 @@ export default {
     },
     getSheetBalanceAndCutdown () {
       const keys = []
+      // 设置减值和余额的th
       Object.keys(this.getSheet[0]).forEach(key => {
         if (/余额|减值/.test(key)) {
           this.changeCustomTitle(/余额/.test(key) ? 'balance' : 'cutdown', key)
@@ -533,7 +651,8 @@ export default {
             slots: {
               title: `${/余额/.test(key) ? 'Balance' : 'CutDown'}Title`,
               customRender: /余额/.test(key) ? 'Balance' : 'CutDown'
-            }
+            },
+            align: 'right'
           })
         }
       })
@@ -594,10 +713,10 @@ export default {
           console.log(selected, selectedRows, changeRows)
         }
       }
-    },
-    getTableScrollY () {
-      return window.innerHeight - 310
     }
+  },
+  unmounted () {
+    window.removeEventListener('resize', this.getTableScrollY)
   }
 }
 </script>
@@ -610,10 +729,17 @@ main.table {
   overflow-y: auto;
 
   .table-content {
-    padding: 0 15px;
     background: #fff;
     height: calc(100% - 65px);
     overflow: auto;
+
+    .tab-content-action-bar {
+      margin-right: 25px;
+
+      button + button {
+        margin-left: 10px;
+      }
+    }
 
     & /deep/ .ant-tabs-top-bar {
       position: sticky;
@@ -635,8 +761,8 @@ main.table {
       }
     }
 
-    & /deep/ .ant-table-row-cell-break-word {
-      //padding: 0;
+    .tag-list /deep/ .ant-tag ~ .ant-tag {
+      margin-top: 5px;
     }
 
     .custom-title {
@@ -646,16 +772,10 @@ main.table {
     }
 
     .statistics-bar {
-      position: sticky;
-      bottom: 0;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      background: #fff;
       width: 100%;
-      border-top: 1px solid #efefef;
-      padding: 20px 0;
-      z-index: 10;
 
       & .ant-statistic {
         margin: 0 50px;
